@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CI &amp; DC URL Directory</title>
+<title>CI &amp; Digital Channels URL Directory</title>
 <style>
   :root {
     --bg: #f5f6f8;
@@ -19,7 +19,6 @@
     --dc: #a4580c;
     --dc-soft: #fbead6;
     --danger: #b3261e;
-    --danger-soft: #fbe4e2;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
@@ -37,12 +36,12 @@
       --dc: #f0b36c;
       --dc-soft: #422b12;
       --danger: #ff8a80;
-      --danger-soft: #4a1f1c;
       color-scheme: dark;
     }
   }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body {
     margin: 0;
     background: var(--bg);
@@ -58,14 +57,43 @@
   header {
     background: var(--surface);
     border-bottom: 1px solid var(--line);
-    padding: 28px 0 20px;
+    padding: 28px 0 0;
   }
   .head-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 14px; }
   header h1 { margin: 0 0 4px; font-size: 1.6rem; letter-spacing: -0.01em; }
   header p { margin: 0; color: var(--muted); }
   .head-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
-  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+  /* Page navigation (CI / Digital Channels) */
+  .page-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .page-nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    text-decoration: none;
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .page-nav a:hover { border-color: var(--accent); }
+  .page-nav a[aria-current="page"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+  .page-nav .n {
+    padding: 0 8px;
+    font-size: .75rem;
+    font-weight: 400;
+    background: var(--bg);
+    color: var(--muted);
+    border-radius: 999px;
+  }
+  .page-nav a[aria-current="page"] .n { background: rgba(255,255,255,.22); color: var(--on-accent); }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
   .search {
     flex: 1 1 260px;
     padding: 10px 14px;
@@ -75,7 +103,6 @@
     border: 1px solid var(--line);
     border-radius: 8px;
   }
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
   .tab {
     font: inherit;
     padding: 9px 14px;
@@ -96,12 +123,46 @@
   .views .tab:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
   .views .tab:last-child { border-radius: 0 8px 8px 0; }
 
+  /* Environment tabs (Digital Channels page only) */
+  .env-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 14px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--line);
+    scrollbar-width: thin;
+  }
+  .env-tab {
+    flex-shrink: 0;
+    font: inherit;
+    padding: 10px 16px;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .env-tab:hover { color: var(--text); }
+  .env-tab[aria-pressed="true"] { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent); }
+  .env-tab .n {
+    margin-left: 6px;
+    padding: 1px 7px;
+    font-size: .75rem;
+    font-weight: 400;
+    color: var(--muted);
+    background: var(--bg);
+    border-radius: 999px;
+  }
+  .env-tab[aria-pressed="true"] .n { background: var(--accent-soft); color: var(--accent); }
+  .no-env-gap { height: 20px; }
+
   main { padding: 28px 0 56px; }
 
-  section { margin-bottom: 36px; }
-  section h2 { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; font-size: 1.2rem; }
-  section h2 .count { font-size: .85rem; font-weight: 400; color: var(--muted); }
-  section > p { margin: 0 0 14px; color: var(--muted); font-size: .95rem; }
+  .page-head h2 { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; font-size: 1.2rem; }
+  .page-head h2 .count { font-size: .85rem; font-weight: 400; color: var(--muted); }
+  .page-head p { margin: 0 0 14px; color: var(--muted); font-size: .95rem; }
 
   .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 
@@ -122,9 +183,19 @@
   .link-name { font-weight: 600; text-decoration: none; word-break: break-word; }
   .link-name:hover { text-decoration: underline; }
 
+  .badges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
   .tag { flex-shrink: 0; padding: 2px 8px; font-size: .75rem; border-radius: 999px; }
   .link[data-group="ci"] .tag, .tag.ci { background: var(--ci-soft); color: var(--ci); }
   .link[data-group="dc"] .tag, .tag.dc { background: var(--dc-soft); color: var(--dc); }
+  .env-pill {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+  }
 
   .link-url { font-size: .8rem; color: var(--muted); word-break: break-all; }
   .link-desc { font-size: .9rem; }
@@ -159,7 +230,7 @@
   /* Compact list view */
   .grid.list { grid-template-columns: 1fr; gap: 8px; }
   .grid.list .link { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 10px 14px; }
-  .grid.list .link-top { flex: 0 1 260px; }
+  .grid.list .link-top { flex: 0 1 280px; }
   .grid.list .link-url { flex: 1 1 240px; }
   .grid.list .link-desc { display: none; }
   .grid.list .link-actions { margin-top: 0; }
@@ -176,13 +247,11 @@
   .tbl th, .tbl td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
   .tbl th { font-weight: 600; color: var(--muted); background: var(--bg); white-space: nowrap; }
   .tbl tr:last-child td { border-bottom: 0; }
-  .tbl td.url { color: var(--muted); font-size: .82rem; word-break: break-all; }
+  .tbl td.col-url { color: var(--muted); font-size: .82rem; word-break: break-all; }
   .tbl td.act { white-space: nowrap; }
   .tbl td.act .btn { margin-right: 4px; }
   .tbl .tag { display: inline-block; }
-  @media (max-width: 700px) {
-    .tbl th:nth-child(3), .tbl td:nth-child(3) { display: none; }
-  }
+  @media (max-width: 700px) { .tbl .col-url { display: none; } }
 
   .empty {
     display: none;
@@ -216,6 +285,7 @@
   }
   .field textarea { resize: vertical; min-height: 64px; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row2.single { grid-template-columns: 1fr; }
   @media (max-width: 420px) { .row2 { grid-template-columns: 1fr; } }
   .form-error { min-height: 1.3em; margin: 0 0 8px; font-size: .88rem; color: var(--danger); }
   .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
@@ -253,8 +323,8 @@
   <div class="wrap">
     <div class="head-row">
       <div>
-        <h1>CI &amp; DC URL Directory</h1>
-        <p>One place for CI tracking and data center links.</p>
+        <h1>CI &amp; Digital Channels URL Directory</h1>
+        <p>Keep your CI tracking links and Digital Channels (DC) links in one place.</p>
       </div>
       <div class="head-actions">
         <button id="add-btn" class="btn primary" type="button">Add link</button>
@@ -264,35 +334,31 @@
       </div>
     </div>
 
+    <nav class="page-nav" aria-label="Pages">
+      <a href="#ci" data-page="ci">CI Tracking <span class="n"></span></a>
+      <a href="#dc" data-page="dc">Digital Channels (DC) <span class="n"></span></a>
+    </nav>
+
     <div class="toolbar">
-      <input id="search" class="search" type="search" placeholder="Search by name, URL or tag" aria-label="Search links">
-      <div class="tabs" role="group" aria-label="Filter by group">
-        <button class="tab" data-filter="all" aria-pressed="true">All</button>
-        <button class="tab" data-filter="ci" aria-pressed="false">CI Tracking</button>
-        <button class="tab" data-filter="dc" aria-pressed="false">DC</button>
-      </div>
+      <input id="search" class="search" type="search" placeholder="Search by name, URL or tag" aria-label="Search links on this page">
       <div class="views" role="group" aria-label="Choose layout">
         <button class="tab" data-view="cards" aria-pressed="true">Cards</button>
         <button class="tab" data-view="list" aria-pressed="false">List</button>
         <button class="tab" data-view="table" aria-pressed="false">Table</button>
       </div>
     </div>
+
+    <div class="env-bar" id="env-tabs" role="group" aria-label="Environment" hidden></div>
+    <div class="no-env-gap" id="env-gap"></div>
   </div>
 </header>
 
 <main class="wrap">
-  <section id="sec-ci" data-group="ci">
-    <h2>CI Tracking <span class="count"></span></h2>
-    <p>Pipelines, build dashboards and release tracking.</p>
-    <div class="grid"></div>
-  </section>
-
-  <section id="sec-dc" data-group="dc">
-    <h2>DC <span class="count"></span></h2>
-    <p>Data center consoles, monitoring and runbooks.</p>
-    <div class="grid"></div>
-  </section>
-
+  <div class="page-head">
+    <h2><span id="page-title"></span> <span class="count" id="page-count"></span></h2>
+    <p id="page-desc"></p>
+  </div>
+  <div id="grid" class="grid"></div>
   <div id="empty" class="empty"></div>
 </main>
 
@@ -313,17 +379,14 @@
       <label for="f-url">URL</label>
       <input id="f-url" type="text" inputmode="url" required placeholder="https://ci.example.com/pipelines">
     </div>
-    <div class="row2">
-      <div class="field">
-        <label for="f-group">Section</label>
-        <select id="f-group">
-          <option value="ci">CI Tracking</option>
-          <option value="dc">DC</option>
-        </select>
+    <div class="row2" id="row-env-tag">
+      <div class="field" id="env-field">
+        <label for="f-env">Environment</label>
+        <select id="f-env"></select>
       </div>
       <div class="field">
         <label for="f-tag">Tag</label>
-        <input id="f-tag" type="text" maxlength="24" placeholder="Prod">
+        <input id="f-tag" type="text" maxlength="24" placeholder="Monitoring">
       </div>
     </div>
     <div class="field">
@@ -352,31 +415,45 @@
 <div id="status" role="status" aria-live="polite"></div>
 
 <script>
-  /* ---- Starter links (used only the first time the page loads) ----
-     After that, add, edit and delete from the page itself.
-     group: "ci" or "dc" */
+  /* Environment tabs for the Digital Channels page.
+     Edit this list to add, remove or rename tabs. */
+  const ENVIRONMENTS = ["Prod", "Preprod", "IIT4", "IIT3", "CTT"];
+
+  const PAGES = {
+    ci: { title: "CI Tracking",           desc: "Pipelines, build dashboards and release tracking.", add: "CI link" },
+    dc: { title: "Digital Channels (DC)", desc: "Digital channel apps, monitoring and runbooks.",    add: "Digital Channels link" }
+  };
+
+  /* Starter links, used only the first time the page loads in a browser.
+     group: "ci" or "dc". CI links have no environment. */
   const DEFAULT_LINKS = [
-    { group: "ci", name: "Build Pipeline Dashboard", url: "https://ci.example.com/pipelines", tag: "Prod",    desc: "Status of all build and deploy pipelines." },
-    { group: "ci", name: "Release Tracker",          url: "https://ci.example.com/releases",  tag: "Release", desc: "Release versions, owners and dates." },
-    { group: "ci", name: "Test Reports",             url: "https://ci.example.com/tests",     tag: "QA",      desc: "Latest automated test results." },
-    { group: "ci", name: "Staging Jobs",             url: "https://ci-stg.example.com/jobs",  tag: "Staging", desc: "Jobs running against the staging environment." },
-    { group: "ci", name: "Artifact Repository",      url: "https://artifacts.example.com",    tag: "Build",   desc: "Published packages and images." },
-    { group: "dc", name: "DC1 Monitoring",           url: "https://dc1.example.com/monitor",  tag: "DC1",     desc: "Health and capacity for data center 1." },
-    { group: "dc", name: "DC2 Monitoring",           url: "https://dc2.example.com/monitor",  tag: "DC2",     desc: "Health and capacity for data center 2." },
-    { group: "dc", name: "Server Inventory",         url: "https://dc.example.com/inventory", tag: "Assets",  desc: "Racks, hosts and hardware details." },
-    { group: "dc", name: "Network Console",          url: "https://dc.example.com/network",   tag: "Network", desc: "Switches, VLANs and connectivity." },
-    { group: "dc", name: "Incident Runbook",         url: "https://wiki.example.com/dc-runbook", tag: "Docs", desc: "Steps to follow during a DC incident." }
+    { group: "ci", name: "Build Pipeline Dashboard", url: "https://ci.example.com/pipelines", tag: "Pipelines", desc: "Status of all build and deploy pipelines." },
+    { group: "ci", name: "Release Tracker",          url: "https://ci.example.com/releases",  tag: "Release",   desc: "Release versions, owners and dates." },
+    { group: "ci", name: "Test Reports",             url: "https://ci.example.com/tests",     tag: "QA",        desc: "Latest automated test results." },
+    { group: "ci", name: "Nightly Jobs",             url: "https://ci.example.com/nightly",   tag: "Jobs",      desc: "Scheduled jobs and their last run." },
+    { group: "ci", name: "Artifact Repository",      url: "https://artifacts.example.com",    tag: "Build",     desc: "Published packages and images." },
+
+    { group: "dc", env: "Prod",    name: "Web Portal",         url: "https://portal.example.com",                tag: "Web",        desc: "Customer-facing web channel." },
+    { group: "dc", env: "Preprod", name: "Mobile App Backend", url: "https://mobile-preprod.example.com/health", tag: "Mobile",     desc: "Health and version of the mobile channel services." },
+    { group: "dc", env: "IIT4",    name: "API Gateway",        url: "https://api-iit4.example.com/console",      tag: "API",        desc: "API routes, keys and traffic." },
+    { group: "dc", env: "IIT3",    name: "Channel Monitoring", url: "https://monitor-iit3.example.com/channels", tag: "Monitoring", desc: "Uptime and error rates for digital channels." },
+    { group: "dc", env: "CTT",     name: "Incident Runbook",   url: "https://wiki.example.com/dc-runbook",       tag: "Docs",       desc: "Steps to follow during a channel incident." }
   ];
 
   const STORAGE_KEY = "ci-dc-url-directory-v1";
-  const state = { filter: "all", query: "", view: "cards" };
+  const state = { page: pageFromHash(), query: "", view: "cards", env: "all" };
   let editingId = null;
+  let editorGroup = "ci";
   let deletingId = null;
   let statusTimer = null;
 
   const $ = id => document.getElementById(id);
   const editor = $("editor");
   const confirmDlg = $("confirm");
+
+  function pageFromHash() {
+    return location.hash === "#dc" ? "dc" : "ci";
+  }
 
   /* ---------- Data ---------- */
   function uid() {
@@ -403,9 +480,23 @@
     const url = normalizeUrl(l.url);
     const name = String(l.name || "").trim();
     if (!url || !name) return null;
+    const group = l.group === "dc" ? "dc" : "ci";
+
+    // Only Digital Channels links have an environment. For older links
+    // that only had a tag such as "Prod", pick the matching environment.
+    let env = "";
+    if (group === "dc") {
+      env = typeof l.env === "string" ? l.env.trim() : "";
+      if (!ENVIRONMENTS.includes(env)) {
+        const tagText = String(l.tag || "").trim().toLowerCase();
+        env = ENVIRONMENTS.find(e => e.toLowerCase() === tagText) || "";
+      }
+    }
+
     return {
       id: typeof l.id === "string" && l.id ? l.id : uid(),
-      group: l.group === "dc" ? "dc" : "ci",
+      group: group,
+      env: env,
       name: name.slice(0, 80),
       url: url,
       tag: String(l.tag || "").trim().slice(0, 24),
@@ -488,6 +579,13 @@
     return a;
   }
 
+  function envPill(item) {
+    const p = document.createElement("span");
+    p.className = "env-pill";
+    p.textContent = item.env;
+    return p;
+  }
+
   function makeCard(item) {
     const card = document.createElement("article");
     card.className = "link";
@@ -496,44 +594,57 @@
     const top = document.createElement("div");
     top.className = "link-top";
     top.appendChild(openLink(item, "link-name", item.name));
+
+    const badges = document.createElement("div");
+    badges.className = "badges";
+    if (item.env) badges.appendChild(envPill(item));
     if (item.tag) {
       const tag = document.createElement("span");
       tag.className = "tag";
       tag.textContent = item.tag;
-      top.appendChild(tag);
+      badges.appendChild(tag);
     }
+    if (badges.childNodes.length) top.appendChild(badges);
 
     const url = document.createElement("div");
     url.className = "link-url";
     url.textContent = item.url;
-
-    const desc = document.createElement("div");
-    desc.className = "link-desc";
-    desc.textContent = item.desc;
 
     const actions = document.createElement("div");
     actions.className = "link-actions";
     actions.append(openLink(item, "btn", "Open"), copyButton(item), editButton(item), deleteButton(item));
 
     card.append(top, url);
-    if (item.desc) card.appendChild(desc);
+    if (item.desc) {
+      const desc = document.createElement("div");
+      desc.className = "link-desc";
+      desc.textContent = item.desc;
+      card.appendChild(desc);
+    }
     card.appendChild(actions);
     return card;
   }
 
-  function makeTable(items) {
+  function makeTable(items, showEnv) {
     const table = document.createElement("table");
     table.className = "tbl";
     const head = table.createTHead().insertRow();
-    ["Name", "Tag", "URL", "Actions"].forEach(h => {
+    const cols = showEnv ? ["Name", "Environment", "Tag", "URL", "Actions"] : ["Name", "Tag", "URL", "Actions"];
+    cols.forEach(h => {
       const th = document.createElement("th");
       th.textContent = h;
+      if (h === "URL") th.className = "col-url";
       head.appendChild(th);
     });
     const body = table.createTBody();
     items.forEach(item => {
       const tr = body.insertRow();
       tr.insertCell().appendChild(openLink(item, "link-name", item.name));
+
+      if (showEnv) {
+        const envCell = tr.insertCell();
+        if (item.env) envCell.appendChild(envPill(item));
+      }
 
       const tagCell = tr.insertCell();
       if (item.tag) {
@@ -544,7 +655,7 @@
       }
 
       const url = tr.insertCell();
-      url.className = "url";
+      url.className = "col-url";
       url.textContent = item.url;
 
       const act = tr.insertCell();
@@ -554,37 +665,81 @@
     return table;
   }
 
-  function render() {
-    const q = state.query.trim().toLowerCase();
-    let total = 0;
+  function matchesQuery(l, q) {
+    return !q || (l.name + " " + l.url + " " + l.env + " " + l.tag + " " + l.desc).toLowerCase().includes(q);
+  }
 
-    document.querySelectorAll("section[data-group]").forEach(section => {
-      const group = section.dataset.group;
-      const grid = section.querySelector(".grid");
-      grid.replaceChildren();
-
-      const matches = LINKS.filter(l =>
-        l.group === group &&
-        (state.filter === "all" || state.filter === group) &&
-        (!q || (l.name + " " + l.url + " " + l.tag + " " + l.desc).toLowerCase().includes(q))
-      );
-
-      grid.className = "grid" + (state.view === "cards" ? "" : " " + state.view);
-      if (state.view === "table") {
-        if (matches.length) grid.appendChild(makeTable(matches));
-      } else {
-        matches.forEach(l => grid.appendChild(makeCard(l)));
-      }
-      section.querySelector(".count").textContent = "(" + matches.length + ")";
-      section.hidden = matches.length === 0;
-      total += matches.length;
+  function buildEnvTabs() {
+    const bar = $("env-tabs");
+    ["all"].concat(ENVIRONMENTS).forEach(env => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "env-tab";
+      b.dataset.env = env;
+      b.setAttribute("aria-pressed", String(env === state.env));
+      const label = document.createElement("span");
+      label.textContent = env === "all" ? "All environments" : env;
+      const n = document.createElement("span");
+      n.className = "n";
+      b.append(label, n);
+      b.addEventListener("click", () => {
+        state.env = env;
+        render();
+      });
+      bar.appendChild(b);
     });
+  }
+
+  function updateEnvTabs(pageLinks, q) {
+    const base = pageLinks.filter(l => matchesQuery(l, q));
+    $("env-tabs").querySelectorAll(".env-tab").forEach(b => {
+      const env = b.dataset.env;
+      const n = env === "all" ? base.length : base.filter(l => l.env === env).length;
+      b.querySelector(".n").textContent = n;
+      b.setAttribute("aria-pressed", String(env === state.env));
+    });
+  }
+
+  function render() {
+    const page = state.page;
+    const isDc = page === "dc";
+    const q = state.query.trim().toLowerCase();
+    const pageLinks = LINKS.filter(l => l.group === page);
+
+    // Page navigation
+    document.querySelectorAll(".page-nav a").forEach(a => {
+      const p = a.dataset.page;
+      if (p === page) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+      a.querySelector(".n").textContent = LINKS.filter(l => l.group === p).length;
+    });
+    document.title = PAGES[page].title + " | URL Directory";
+    $("page-title").textContent = PAGES[page].title;
+    $("page-desc").textContent = PAGES[page].desc;
+
+    // Environment tabs appear on the Digital Channels page only
+    $("env-tabs").hidden = !isDc;
+    $("env-gap").hidden = isDc;
+    if (isDc) updateEnvTabs(pageLinks, q);
+
+    const matches = pageLinks.filter(l =>
+      matchesQuery(l, q) && (!isDc || state.env === "all" || l.env === state.env)
+    );
+
+    const grid = $("grid");
+    grid.replaceChildren();
+    grid.className = "grid" + (state.view === "cards" ? "" : " " + state.view);
+    if (state.view === "table") {
+      if (matches.length) grid.appendChild(makeTable(matches, isDc));
+    } else {
+      matches.forEach(l => grid.appendChild(makeCard(l)));
+    }
+    $("page-count").textContent = "(" + matches.length + ")";
 
     const emptyEl = $("empty");
-    if (total === 0) {
-      emptyEl.textContent = LINKS.length === 0
-        ? "No links yet. Select Add link to create the first one."
-        : "No links match your search. Clear the search box or switch the filter to All.";
+    if (matches.length === 0) {
+      emptyEl.textContent = pageLinks.length === 0
+        ? "No links on this page yet. Select Add link to create the first one."
+        : "No links match your search" + (isDc ? " or environment" : "") + ". Clear the search box" + (isDc ? " or choose All environments" : "") + ".";
       emptyEl.style.display = "block";
     } else {
       emptyEl.style.display = "none";
@@ -595,13 +750,18 @@
   function openEditor(id) {
     editingId = id || null;
     const item = id ? LINKS.find(l => l.id === id) : null;
-    $("editor-title").textContent = item ? "Edit link" : "Add link";
+    editorGroup = item ? item.group : state.page;
+    const isDc = editorGroup === "dc";
+
+    $("editor-title").textContent = (item ? "Edit " : "Add ") + PAGES[editorGroup].add;
     $("editor-save").textContent = item ? "Save changes" : "Save link";
     $("f-name").value = item ? item.name : "";
     $("f-url").value = item ? item.url : "";
-    $("f-group").value = item ? item.group : (state.filter === "dc" ? "dc" : "ci");
     $("f-tag").value = item ? item.tag : "";
     $("f-desc").value = item ? item.desc : "";
+    $("env-field").hidden = !isDc;
+    $("row-env-tag").classList.toggle("single", !isDc);
+    $("f-env").value = item ? item.env : (state.env === "all" ? "" : state.env);
     $("form-error").textContent = "";
     editor.showModal();
     $("f-name").focus();
@@ -617,7 +777,8 @@
     if (!url) { err.textContent = "Enter a valid web address, such as https://ci.example.com."; $("f-url").focus(); return; }
 
     const data = {
-      group: $("f-group").value === "dc" ? "dc" : "ci",
+      group: editorGroup,
+      env: editorGroup === "dc" ? $("f-env").value : "",
       name: name,
       url: url,
       tag: $("f-tag").value.trim(),
@@ -629,6 +790,11 @@
       if (i !== -1) LINKS[i] = Object.assign({}, LINKS[i], data);
     } else {
       LINKS.push(Object.assign({ id: uid() }, data));
+    }
+
+    // Make sure the saved link is visible: jump to its environment tab
+    if (editorGroup === "dc" && state.env !== "all" && state.env !== data.env) {
+      state.env = data.env || "all";
     }
 
     const wasEditing = !!editingId;
@@ -676,7 +842,7 @@
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    showStatus("Exported " + LINKS.length + " links.");
+    showStatus("Exported " + LINKS.length + " links from both pages.");
   });
 
   $("import-btn").addEventListener("click", () => $("import-file").click());
@@ -689,13 +855,14 @@
       try {
         const arr = JSON.parse(reader.result);
         if (!Array.isArray(arr)) throw new Error("not a list");
-        const existing = new Set(LINKS.map(l => l.url));
+        const keyOf = l => l.group + "|" + l.env + "|" + l.url;
+        const existing = new Set(LINKS.map(keyOf));
         let added = 0;
         arr.map(cleanLink).filter(Boolean).forEach(l => {
-          if (existing.has(l.url)) return;
+          if (existing.has(keyOf(l))) return;
           l.id = uid();
           LINKS.push(l);
-          existing.add(l.url);
+          existing.add(keyOf(l));
           added++;
         });
         saveLinks();
@@ -709,16 +876,8 @@
     reader.readAsText(file);
   });
 
-  /* ---------- Search, filter, view ---------- */
+  /* ---------- Search, view, page ---------- */
   $("search").addEventListener("input", e => { state.query = e.target.value; render(); });
-
-  document.querySelectorAll("[data-filter]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      state.filter = btn.dataset.filter;
-      document.querySelectorAll("[data-filter]").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
-      render();
-    });
-  });
 
   document.querySelectorAll("[data-view]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -728,7 +887,26 @@
     });
   });
 
-  render();
+  window.addEventListener("hashchange", () => {
+    state.page = pageFromHash();
+    render();
+  });
+
+  (function init() {
+    const sel = $("f-env");
+    const none = document.createElement("option");
+    none.value = "";
+    none.textContent = "Not set";
+    sel.appendChild(none);
+    ENVIRONMENTS.forEach(env => {
+      const o = document.createElement("option");
+      o.value = env;
+      o.textContent = env;
+      sel.appendChild(o);
+    });
+    buildEnvTabs();
+    render();
+  })();
 </script>
 </body>
 </html>
