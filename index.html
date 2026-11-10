@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CI &amp; DC URL Directory</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --text: #1b2330;
+    --muted: #5d6879;
+    --line: #dde1e8;
+    --accent: #0b6e6e;
+    --accent-soft: #dff1f0;
+    --on-accent: #ffffff;
+    --ci: #2f5fd0;
+    --ci-soft: #e3eafb;
+    --dc: #a4580c;
+    --dc-soft: #fbead6;
+    --danger: #b3261e;
+    --danger-soft: #fbe4e2;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12171f;
+      --surface: #1a212c;
+      --text: #e7ebf2;
+      --muted: #9aa5b6;
+      --line: #2b3442;
+      --accent: #5fd0cb;
+      --accent-soft: #17393a;
+      --on-accent: #0c1b1b;
+      --ci: #8fb0ff;
+      --ci-soft: #1f2c4d;
+      --dc: #f0b36c;
+      --dc-soft: #422b12;
+      --danger: #ff8a80;
+      --danger-soft: #4a1f1c;
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 28px 0 20px;
+  }
+  .head-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 14px; }
+  header h1 { margin: 0 0 4px; font-size: 1.6rem; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); }
+  .head-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+  .search {
+    flex: 1 1 260px;
+    padding: 10px 14px;
+    font: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tab {
+    font: inherit;
+    padding: 9px 14px;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .tab[aria-pressed="true"] {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .views { display: flex; }
+  .views .tab { border-radius: 0; margin-left: -1px; }
+  .views .tab:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
+  .views .tab:last-child { border-radius: 0 8px 8px 0; }
+
+  main { padding: 28px 0 56px; }
+
+  section { margin-bottom: 36px; }
+  section h2 { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; font-size: 1.2rem; }
+  section h2 .count { font-size: .85rem; font-weight: 400; color: var(--muted); }
+  section > p { margin: 0 0 14px; color: var(--muted); font-size: .95rem; }
+
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+
+  .link {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+    border-radius: 8px;
+  }
+  .link[data-group="ci"] { border-left-color: var(--ci); }
+  .link[data-group="dc"] { border-left-color: var(--dc); }
+
+  .link-top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+  .link-name { font-weight: 600; text-decoration: none; word-break: break-word; }
+  .link-name:hover { text-decoration: underline; }
+
+  .tag { flex-shrink: 0; padding: 2px 8px; font-size: .75rem; border-radius: 999px; }
+  .link[data-group="ci"] .tag, .tag.ci { background: var(--ci-soft); color: var(--ci); }
+  .link[data-group="dc"] .tag, .tag.dc { background: var(--dc-soft); color: var(--dc); }
+
+  .link-url { font-size: .8rem; color: var(--muted); word-break: break-all; }
+  .link-desc { font-size: .9rem; }
+
+  .link-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .btn {
+    font: inherit;
+    font-size: .82rem;
+    padding: 4px 10px;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+  .btn.primary {
+    font-size: .9rem;
+    padding: 8px 14px;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+  .btn.primary:hover { color: var(--on-accent); filter: brightness(1.08); }
+  .btn.solid-danger { background: var(--danger); border-color: var(--danger); color: #fff; font-weight: 600; padding: 8px 14px; font-size: .9rem; }
+  .btn.solid-danger:hover { color: #fff; filter: brightness(1.08); }
+  .btn.plain { padding: 8px 14px; font-size: .9rem; }
+
+  /* Compact list view */
+  .grid.list { grid-template-columns: 1fr; gap: 8px; }
+  .grid.list .link { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 10px 14px; }
+  .grid.list .link-top { flex: 0 1 260px; }
+  .grid.list .link-url { flex: 1 1 240px; }
+  .grid.list .link-desc { display: none; }
+  .grid.list .link-actions { margin-top: 0; }
+
+  /* Table view */
+  .grid.table { display: block; overflow-x: auto; }
+  table.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    font-size: .92rem;
+  }
+  .tbl th, .tbl td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .tbl th { font-weight: 600; color: var(--muted); background: var(--bg); white-space: nowrap; }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .tbl td.url { color: var(--muted); font-size: .82rem; word-break: break-all; }
+  .tbl td.act { white-space: nowrap; }
+  .tbl td.act .btn { margin-right: 4px; }
+  .tbl .tag { display: inline-block; }
+  @media (max-width: 700px) {
+    .tbl th:nth-child(3), .tbl td:nth-child(3) { display: none; }
+  }
+
+  .empty {
+    display: none;
+    padding: 28px;
+    text-align: center;
+    color: var(--muted);
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+  }
+
+  /* Dialogs */
+  dialog {
+    width: min(480px, calc(100vw - 32px));
+    padding: 22px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  dialog::backdrop { background: rgba(10, 14, 20, .55); }
+  dialog h3 { margin: 0 0 14px; font-size: 1.15rem; }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .field label { font-size: .88rem; font-weight: 600; }
+  .field input, .field select, .field textarea {
+    font: inherit;
+    padding: 9px 12px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .field textarea { resize: vertical; min-height: 64px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 420px) { .row2 { grid-template-columns: 1fr; } }
+  .form-error { min-height: 1.3em; margin: 0 0 8px; font-size: .88rem; color: var(--danger); }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  dialog p.msg { margin: 0 0 18px; color: var(--muted); word-break: break-word; }
+
+  #status {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    max-width: calc(100vw - 32px);
+    padding: 10px 16px;
+    font-size: .9rem;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+  }
+  #status.show { opacity: 1; }
+
+  footer { padding: 20px 0 40px; color: var(--muted); font-size: .85rem; }
+
+  @media (max-width: 520px) {
+    header h1 { font-size: 1.35rem; }
+    .grid { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { #status { transition: none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="head-row">
+      <div>
+        <h1>CI &amp; DC URL Directory</h1>
+        <p>One place for CI tracking and data center links.</p>
+      </div>
+      <div class="head-actions">
+        <button id="add-btn" class="btn primary" type="button">Add link</button>
+        <button id="export-btn" class="btn plain" type="button">Export</button>
+        <button id="import-btn" class="btn plain" type="button">Import</button>
+        <input id="import-file" type="file" accept="application/json,.json" hidden>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" class="search" type="search" placeholder="Search by name, URL or tag" aria-label="Search links">
+      <div class="tabs" role="group" aria-label="Filter by group">
+        <button class="tab" data-filter="all" aria-pressed="true">All</button>
+        <button class="tab" data-filter="ci" aria-pressed="false">CI Tracking</button>
+        <button class="tab" data-filter="dc" aria-pressed="false">DC</button>
+      </div>
+      <div class="views" role="group" aria-label="Choose layout">
+        <button class="tab" data-view="cards" aria-pressed="true">Cards</button>
+        <button class="tab" data-view="list" aria-pressed="false">List</button>
+        <button class="tab" data-view="table" aria-pressed="false">Table</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="sec-ci" data-group="ci">
+    <h2>CI Tracking <span class="count"></span></h2>
+    <p>Pipelines, build dashboards and release tracking.</p>
+    <div class="grid"></div>
+  </section>
+
+  <section id="sec-dc" data-group="dc">
+    <h2>DC <span class="count"></span></h2>
+    <p>Data center consoles, monitoring and runbooks.</p>
+    <div class="grid"></div>
+  </section>
+
+  <div id="empty" class="empty"></div>
+</main>
+
+<footer>
+  <div class="wrap">Changes are saved in this browser. Use Export to back up your links or move them to another browser, and Import to load them there.</div>
+</footer>
+
+<!-- Add / edit dialog -->
+<dialog id="editor" aria-labelledby="editor-title">
+  <form id="editor-form" novalidate>
+    <h3 id="editor-title">Add link</h3>
+
+    <div class="field">
+      <label for="f-name">Name</label>
+      <input id="f-name" type="text" maxlength="80" required placeholder="Build Pipeline Dashboard">
+    </div>
+    <div class="field">
+      <label for="f-url">URL</label>
+      <input id="f-url" type="text" inputmode="url" required placeholder="https://ci.example.com/pipelines">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="f-group">Section</label>
+        <select id="f-group">
+          <option value="ci">CI Tracking</option>
+          <option value="dc">DC</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-tag">Tag</label>
+        <input id="f-tag" type="text" maxlength="24" placeholder="Prod">
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-desc">Description</label>
+      <textarea id="f-desc" maxlength="200" placeholder="What this link is for"></textarea>
+    </div>
+
+    <p id="form-error" class="form-error" role="alert"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn plain" id="editor-cancel">Cancel</button>
+      <button type="submit" class="btn primary" id="editor-save">Save link</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Delete confirmation -->
+<dialog id="confirm" aria-labelledby="confirm-title">
+  <h3 id="confirm-title">Delete link?</h3>
+  <p class="msg" id="confirm-msg"></p>
+  <div class="dialog-actions">
+    <button type="button" class="btn plain" id="confirm-cancel">Cancel</button>
+    <button type="button" class="btn solid-danger" id="confirm-ok">Delete link</button>
+  </div>
+</dialog>
+
+<div id="status" role="status" aria-live="polite"></div>
+
+<script>
+  /* ---- Starter links (used only the first time the page loads) ----
+     After that, add, edit and delete from the page itself.
+     group: "ci" or "dc" */
+  const DEFAULT_LINKS = [
+    { group: "ci", name: "Build Pipeline Dashboard", url: "https://ci.example.com/pipelines", tag: "Prod",    desc: "Status of all build and deploy pipelines." },
+    { group: "ci", name: "Release Tracker",          url: "https://ci.example.com/releases",  tag: "Release", desc: "Release versions, owners and dates." },
+    { group: "ci", name: "Test Reports",             url: "https://ci.example.com/tests",     tag: "QA",      desc: "Latest automated test results." },
+    { group: "ci", name: "Staging Jobs",             url: "https://ci-stg.example.com/jobs",  tag: "Staging", desc: "Jobs running against the staging environment." },
+    { group: "ci", name: "Artifact Repository",      url: "https://artifacts.example.com",    tag: "Build",   desc: "Published packages and images." },
+    { group: "dc", name: "DC1 Monitoring",           url: "https://dc1.example.com/monitor",  tag: "DC1",     desc: "Health and capacity for data center 1." },
+    { group: "dc", name: "DC2 Monitoring",           url: "https://dc2.example.com/monitor",  tag: "DC2",     desc: "Health and capacity for data center 2." },
+    { group: "dc", name: "Server Inventory",         url: "https://dc.example.com/inventory", tag: "Assets",  desc: "Racks, hosts and hardware details." },
+    { group: "dc", name: "Network Console",          url: "https://dc.example.com/network",   tag: "Network", desc: "Switches, VLANs and connectivity." },
+    { group: "dc", name: "Incident Runbook",         url: "https://wiki.example.com/dc-runbook", tag: "Docs", desc: "Steps to follow during a DC incident." }
+  ];
+
+  const STORAGE_KEY = "ci-dc-url-directory-v1";
+  const state = { filter: "all", query: "", view: "cards" };
+  let editingId = null;
+  let deletingId = null;
+  let statusTimer = null;
+
+  const $ = id => document.getElementById(id);
+  const editor = $("editor");
+  const confirmDlg = $("confirm");
+
+  /* ---------- Data ---------- */
+  function uid() {
+    return "l" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  // Returns a cleaned URL string, or null if it is not a valid http(s) URL.
+  function normalizeUrl(input) {
+    let value = String(input || "").trim();
+    if (!value) return null;
+    if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(value)) value = "https://" + value;
+    try {
+      const u = new URL(value);
+      if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+      if (!u.hostname) return null;
+      return value;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function cleanLink(l) {
+    if (!l || typeof l !== "object") return null;
+    const url = normalizeUrl(l.url);
+    const name = String(l.name || "").trim();
+    if (!url || !name) return null;
+    return {
+      id: typeof l.id === "string" && l.id ? l.id : uid(),
+      group: l.group === "dc" ? "dc" : "ci",
+      name: name.slice(0, 80),
+      url: url,
+      tag: String(l.tag || "").trim().slice(0, 24),
+      desc: String(l.desc || "").trim().slice(0, 200)
+    };
+  }
+
+  function loadLinks() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) return arr.map(cleanLink).filter(Boolean);
+      }
+    } catch (e) { /* fall through to defaults */ }
+    return DEFAULT_LINKS.map(cleanLink).filter(Boolean);
+  }
+
+  let LINKS = loadLinks();
+
+  function saveLinks() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(LINKS));
+      return true;
+    } catch (e) {
+      showStatus("Browser storage is blocked, so changes will be lost when you close this page. Use Export to keep a copy.");
+      return false;
+    }
+  }
+
+  function showStatus(msg) {
+    const el = $("status");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => el.classList.remove("show"), 3500);
+  }
+
+  /* ---------- Rendering ---------- */
+  function copyButton(item) {
+    const b = document.createElement("button");
+    b.className = "btn";
+    b.type = "button";
+    b.textContent = "Copy URL";
+    b.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(item.url); b.textContent = "Copied"; }
+      catch (e) { b.textContent = "Copy failed"; }
+      setTimeout(() => (b.textContent = "Copy URL"), 1500);
+    });
+    return b;
+  }
+
+  function editButton(item) {
+    const b = document.createElement("button");
+    b.className = "btn";
+    b.type = "button";
+    b.textContent = "Edit";
+    b.setAttribute("aria-label", "Edit " + item.name);
+    b.addEventListener("click", () => openEditor(item.id));
+    return b;
+  }
+
+  function deleteButton(item) {
+    const b = document.createElement("button");
+    b.className = "btn danger";
+    b.type = "button";
+    b.textContent = "Delete";
+    b.setAttribute("aria-label", "Delete " + item.name);
+    b.addEventListener("click", () => openConfirm(item.id));
+    return b;
+  }
+
+  function openLink(item, className, text) {
+    const a = document.createElement("a");
+    a.className = className;
+    a.href = item.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = text;
+    return a;
+  }
+
+  function makeCard(item) {
+    const card = document.createElement("article");
+    card.className = "link";
+    card.dataset.group = item.group;
+
+    const top = document.createElement("div");
+    top.className = "link-top";
+    top.appendChild(openLink(item, "link-name", item.name));
+    if (item.tag) {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = item.tag;
+      top.appendChild(tag);
+    }
+
+    const url = document.createElement("div");
+    url.className = "link-url";
+    url.textContent = item.url;
+
+    const desc = document.createElement("div");
+    desc.className = "link-desc";
+    desc.textContent = item.desc;
+
+    const actions = document.createElement("div");
+    actions.className = "link-actions";
+    actions.append(openLink(item, "btn", "Open"), copyButton(item), editButton(item), deleteButton(item));
+
+    card.append(top, url);
+    if (item.desc) card.appendChild(desc);
+    card.appendChild(actions);
+    return card;
+  }
+
+  function makeTable(items) {
+    const table = document.createElement("table");
+    table.className = "tbl";
+    const head = table.createTHead().insertRow();
+    ["Name", "Tag", "URL", "Actions"].forEach(h => {
+      const th = document.createElement("th");
+      th.textContent = h;
+      head.appendChild(th);
+    });
+    const body = table.createTBody();
+    items.forEach(item => {
+      const tr = body.insertRow();
+      tr.insertCell().appendChild(openLink(item, "link-name", item.name));
+
+      const tagCell = tr.insertCell();
+      if (item.tag) {
+        const tag = document.createElement("span");
+        tag.className = "tag " + item.group;
+        tag.textContent = item.tag;
+        tagCell.appendChild(tag);
+      }
+
+      const url = tr.insertCell();
+      url.className = "url";
+      url.textContent = item.url;
+
+      const act = tr.insertCell();
+      act.className = "act";
+      act.append(copyButton(item), editButton(item), deleteButton(item));
+    });
+    return table;
+  }
+
+  function render() {
+    const q = state.query.trim().toLowerCase();
+    let total = 0;
+
+    document.querySelectorAll("section[data-group]").forEach(section => {
+      const group = section.dataset.group;
+      const grid = section.querySelector(".grid");
+      grid.replaceChildren();
+
+      const matches = LINKS.filter(l =>
+        l.group === group &&
+        (state.filter === "all" || state.filter === group) &&
+        (!q || (l.name + " " + l.url + " " + l.tag + " " + l.desc).toLowerCase().includes(q))
+      );
+
+      grid.className = "grid" + (state.view === "cards" ? "" : " " + state.view);
+      if (state.view === "table") {
+        if (matches.length) grid.appendChild(makeTable(matches));
+      } else {
+        matches.forEach(l => grid.appendChild(makeCard(l)));
+      }
+      section.querySelector(".count").textContent = "(" + matches.length + ")";
+      section.hidden = matches.length === 0;
+      total += matches.length;
+    });
+
+    const emptyEl = $("empty");
+    if (total === 0) {
+      emptyEl.textContent = LINKS.length === 0
+        ? "No links yet. Select Add link to create the first one."
+        : "No links match your search. Clear the search box or switch the filter to All.";
+      emptyEl.style.display = "block";
+    } else {
+      emptyEl.style.display = "none";
+    }
+  }
+
+  /* ---------- Add / edit ---------- */
+  function openEditor(id) {
+    editingId = id || null;
+    const item = id ? LINKS.find(l => l.id === id) : null;
+    $("editor-title").textContent = item ? "Edit link" : "Add link";
+    $("editor-save").textContent = item ? "Save changes" : "Save link";
+    $("f-name").value = item ? item.name : "";
+    $("f-url").value = item ? item.url : "";
+    $("f-group").value = item ? item.group : (state.filter === "dc" ? "dc" : "ci");
+    $("f-tag").value = item ? item.tag : "";
+    $("f-desc").value = item ? item.desc : "";
+    $("form-error").textContent = "";
+    editor.showModal();
+    $("f-name").focus();
+  }
+
+  $("editor-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const name = $("f-name").value.trim();
+    const url = normalizeUrl($("f-url").value);
+    const err = $("form-error");
+
+    if (!name) { err.textContent = "Enter a name for this link."; $("f-name").focus(); return; }
+    if (!url) { err.textContent = "Enter a valid web address, such as https://ci.example.com."; $("f-url").focus(); return; }
+
+    const data = {
+      group: $("f-group").value === "dc" ? "dc" : "ci",
+      name: name,
+      url: url,
+      tag: $("f-tag").value.trim(),
+      desc: $("f-desc").value.trim()
+    };
+
+    if (editingId) {
+      const i = LINKS.findIndex(l => l.id === editingId);
+      if (i !== -1) LINKS[i] = Object.assign({}, LINKS[i], data);
+    } else {
+      LINKS.push(Object.assign({ id: uid() }, data));
+    }
+
+    const wasEditing = !!editingId;
+    saveLinks();
+    editor.close();
+    render();
+    showStatus(wasEditing ? "Link updated." : "Link added.");
+  });
+
+  $("editor-cancel").addEventListener("click", () => editor.close());
+  $("add-btn").addEventListener("click", () => openEditor(null));
+
+  /* ---------- Delete ---------- */
+  function openConfirm(id) {
+    const item = LINKS.find(l => l.id === id);
+    if (!item) return;
+    deletingId = id;
+    $("confirm-msg").textContent = "\u201C" + item.name + "\u201D will be removed from this directory.";
+    confirmDlg.showModal();
+    $("confirm-cancel").focus();
+  }
+
+  $("confirm-cancel").addEventListener("click", () => confirmDlg.close());
+  $("confirm-ok").addEventListener("click", () => {
+    LINKS = LINKS.filter(l => l.id !== deletingId);
+    deletingId = null;
+    saveLinks();
+    confirmDlg.close();
+    render();
+    showStatus("Link deleted.");
+  });
+
+  // Close a dialog when the backdrop is clicked
+  [editor, confirmDlg].forEach(d => {
+    d.addEventListener("click", e => { if (e.target === d) d.close(); });
+  });
+
+  /* ---------- Export / import ---------- */
+  $("export-btn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(LINKS, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "ci-dc-links.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    showStatus("Exported " + LINKS.length + " links.");
+  });
+
+  $("import-btn").addEventListener("click", () => $("import-file").click());
+  $("import-file").addEventListener("change", e => {
+    const file = e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const arr = JSON.parse(reader.result);
+        if (!Array.isArray(arr)) throw new Error("not a list");
+        const existing = new Set(LINKS.map(l => l.url));
+        let added = 0;
+        arr.map(cleanLink).filter(Boolean).forEach(l => {
+          if (existing.has(l.url)) return;
+          l.id = uid();
+          LINKS.push(l);
+          existing.add(l.url);
+          added++;
+        });
+        saveLinks();
+        render();
+        showStatus(added + " new links imported.");
+      } catch (err) {
+        showStatus("Import failed. Choose a JSON file created with Export.");
+      }
+    };
+    reader.onerror = () => showStatus("Could not read that file.");
+    reader.readAsText(file);
+  });
+
+  /* ---------- Search, filter, view ---------- */
+  $("search").addEventListener("input", e => { state.query = e.target.value; render(); });
+
+  document.querySelectorAll("[data-filter]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.filter = btn.dataset.filter;
+      document.querySelectorAll("[data-filter]").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-view]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.view = btn.dataset.view;
+      document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+      render();
+    });
+  });
+
+  render();
+</script>
+</body>
+</html>
